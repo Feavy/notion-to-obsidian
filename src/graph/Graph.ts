@@ -12,7 +12,7 @@ export default class Graph {
 
   private static generateMarkdownFile(node: Node) {
     let filename = Graph.escape(node.page.title)+".md";
-    let content = "";
+    let content = node.page.url+"\n\n";
     for(const reference of node.references) {
       if(reference instanceof Node) {
         content += `[[${Graph.escape(reference.page.title)}]]\n`;
@@ -22,6 +22,6 @@ export default class Graph {
   }
 
   public static escape(title: string) {
-    return title.replaceAll(/[*"/\\:|?<>]/g, "");
+    return title.replaceAll(/[*"/\\:|?<>]/g, "").trim();
   }
 }
