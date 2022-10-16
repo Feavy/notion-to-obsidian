@@ -2,6 +2,7 @@ import NotionAPI from "../notion/NotionAPI";
 import LinkToPage from "../notion/blocks/LinkToPage";
 import ChildPage from "../notion/blocks/ChildPage";
 import Node from "./Node";
+import Graph from "./Graph";
 
 export default class GraphCreator {
   public constructor(private readonly notion: NotionAPI) { }
@@ -11,23 +12,17 @@ export default class GraphCreator {
   public async createGraph(pageId: string) {
     // Créer le graph
     await this.fillGraph(pageId);
+
+    // Lier le graph
     this.linkGraph();
 
-    for(const node of this.nodes.values()) {
-      console.log(node.page.title, node.page.url, "->");
-      for(const ref of node.references) {
-        if(ref instanceof Node) {
-          console.log("   ", ref.page.title);
-        }else{
-          console.error("Unexpected reference of type string : " + ref);
-        }
-      }
-    }
+    return new Graph(new Set(this.nodes.values()));
   }
 
   private async fillGraph(pageId: string) {
     // Obtenir les link_to_page et les child_page
     const page = await this.notion.retrievePage(pageId);
+    console.log("Processing page: "+page.title);
     await this.notion.retrievePageBlocks(page);
 
     const links: LinkToPage[] = page.getAll("link_to_page");
@@ -43,9 +38,13 @@ export default class GraphCreator {
 
     this.nodes.set(page.id, node);
 
+    const promises: Promise<void>[] = [];
+
     for(const child of children) {
-      await this.fillGraph(child.id);
+      promises.push(this.fillGraph(child.id));
     }
+
+    await Promise.all(promises);
   }
 
   private linkGraph() {
