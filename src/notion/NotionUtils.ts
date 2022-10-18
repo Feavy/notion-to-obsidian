@@ -21,6 +21,17 @@ function text(block: NotionRichText): string {
   return text;
 }
 
+export function urls(blocks: NotionRichText[]) {
+  return blocks.filter(block => block.href).map(block => { return {
+    url: block.href,
+    title: block.plain_text
+  }});
+}
+
+export function escape(title: string) {
+  return title.replaceAll(/[*"/\\:|?<>]/g, "").trim();
+}
+
 export function texts(blocks: NotionRichText[], indent = ""): string {
   return `${indent}${blocks.map(text).join("")}`;
 }

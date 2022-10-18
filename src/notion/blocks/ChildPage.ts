@@ -1,6 +1,5 @@
 import Block from "./Block";
 import {NotionBlock} from "../NotionTypes";
-import {texts} from "../NotionUtils";
 
 export type NotionParagraph = Extract<NotionBlock, { type: 'child_page' }>;
 

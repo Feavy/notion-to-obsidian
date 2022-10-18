@@ -1,5 +1,5 @@
 import {Client} from "@notionhq/client";
-import {NotionBlock} from "./NotionTypes";
+import {NotionBlock, NotionPage} from "./NotionTypes";
 import Block from "./blocks/Block";
 import Blocks from "./blocks/Blocks";
 import Page from "./blocks/Page";
@@ -12,7 +12,7 @@ export default class NotionAPI {
   }
 
   public async retrievePage(page_id: string): Promise<Page> {
-    const pageData: any = await this.notion.pages.retrieve({page_id});
+    const pageData = await this.notion.pages.retrieve({page_id}) as NotionPage;
 
     return new Page(pageData);
   }
