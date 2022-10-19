@@ -1,4 +1,5 @@
 import {NotionBlock} from "../NotionTypes";
+import Graph from "../../graph/Graph";
 
 export default abstract class Block {
   public internal: NotionBlock;
@@ -11,7 +12,7 @@ export default abstract class Block {
     this.type = block.type;
   }
 
-  public visitDeep(visitor: (block) => void) {
+  public visitDeep(visitor: (block: Block) => void) {
     visitor(this);
     this.children.forEach(child => child.visitDeep(visitor));
   }
@@ -25,4 +26,6 @@ export default abstract class Block {
     });
     return result;
   }
+
+  public abstract toMarkdown(graph?: Graph): string;
 }

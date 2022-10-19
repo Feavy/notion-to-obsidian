@@ -1,7 +1,8 @@
 import Block from "./Block";
 import {escape, plaintexts} from "../NotionUtils";
-import {NotionPage} from "../NotionTypes";
+import {NotionPage, NotionRichText} from "../NotionTypes";
 import fs from "fs";
+import Graph from "../../graph/Graph";
 
 export default class Page extends Block {
   public readonly last_edited_time: string;
@@ -35,14 +36,31 @@ export default class Page extends Block {
     return escape(this.title);
   }
 
-  public writeToFile() {
-    let filename = this.path() + ".md";
-    let content = this.url + "\n\n";
-    for (const reference of this.references) {
-      if (reference instanceof Page) {
-        content += `[[${reference.path()}.md]]\n`;
+  public getLinks(): NotionRichText[] {
+    const links = [];
+    this.visitDeep(block => {
+      if(block.internal[block.type]?.rich_text) {
+        for(const richText of block.internal[block.type].rich_text) {
+          if (richText.href) {
+            links.push(richText);
+          }
+        }
       }
+    });
+    return links;
+  }
+
+  public toMarkdown(graph: Graph): string {
+    let content = this.url + "\n\n";
+    for(const child of this.children) {
+      content += child.toMarkdown(graph)+"\n";
     }
+    return content;
+  }
+
+  public writeToFile(graph: Graph) {
+    let filename = this.path() + ".md";
+    let content = this.toMarkdown(graph);
     console.log("Writing to file: " + filename);
     if (this.parent) {
       fs.mkdirSync("vault/" + this.parent.path(), {recursive: true});

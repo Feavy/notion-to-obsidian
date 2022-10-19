@@ -10,7 +10,7 @@ I hope Notion will implement a Obsidian-like graph view in the future.
 
 - [x] Create a vault from Notion pages
 - [x] Organize files in folders
-- [ ] Actually copy content from Notion to Obsidian (notion-obsidian-sync)
+- [x] Actually copy content from Notion to Obsidian (notion-obsidian-sync)
   - Make searching easier
   - Use the true power of Obsidian
 - [ ] Cache pages to avoid downloading them if they haven't changed

@@ -21,11 +21,8 @@ function text(block: NotionRichText): string {
   return text;
 }
 
-export function urls(blocks: NotionRichText[]) {
-  return blocks.filter(block => block.href).map(block => { return {
-    url: block.href,
-    title: block.plain_text
-  }});
+export function uuid(id: string) {
+  return id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32);
 }
 
 export function escape(title: string) {
