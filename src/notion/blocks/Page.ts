@@ -10,8 +10,9 @@ export default class Page extends Block {
   public readonly url: string;
   public slug: string;
   public parent?: Page;
+  public cached: boolean = false;
 
-  public readonly references: (Page | string)[] = []
+  public readonly childPages: Page[] = [];
 
   public constructor(page: NotionPage) {
     super(page as any, [])
@@ -22,18 +23,18 @@ export default class Page extends Block {
     this.slug = page.url.substring(22, page.url.length - 33);
   }
 
-  public replaceReference(newNode: Page) {
-    const index = this.references.indexOf(newNode.id);
-    if (index > -1) {
-      this.references[index] = newNode;
-    }
-  }
-
   public path() {
     if (this.parent) {
       return this.parent.path() + "/" + escape(this.title);
     }
     return escape(this.title);
+  }
+
+  public folder() {
+    if (this.parent) {
+      return this.parent.path();
+    }
+    return null;
   }
 
   public getLinks(): NotionRichText[] {

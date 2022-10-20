@@ -13,6 +13,7 @@ I hope Notion will implement a Obsidian-like graph view in the future.
 - [x] Actually copy content from Notion to Obsidian (notion-obsidian-sync)
   - Make searching easier
   - Use the true power of Obsidian
-- [ ] Cache pages to avoid downloading them if they haven't changed
+- [x] Cache pages to avoid downloading them if they haven't changed
+- [ ] Represent external links in graph
 - [ ] Represent titles hierarchy in graph
 - [ ] Add a CLI (ideally an Obsidian plugin)

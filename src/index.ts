@@ -10,5 +10,5 @@ const notionPage = process.env.NOTION_PAGE;
 const creator = new GraphCreator(new NotionAPI(notionSecret));
 (async () => {
   const graph = await creator.createGraph(notionPage);
-  graph.generateMarkdownFiles();
+  graph.save();
 })();
