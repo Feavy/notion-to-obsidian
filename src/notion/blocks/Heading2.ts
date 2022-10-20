@@ -1,15 +1,8 @@
 import Block from "./Block";
-import {NotionBlock} from "../NotionTypes";
-import {texts} from "../NotionUtils";
+import Heading, {NotionHeading2} from "./Heading";
 
-export type NotionHeading1 = Extract<NotionBlock, { type: 'heading_2' }>;
-
-export default class Heading2 extends Block {
-  constructor(private readonly block: NotionHeading1, children: Block[]) {
+export default class Heading2 extends Heading {
+  constructor(block: NotionHeading2, children: Block[]) {
     super(block, children);
-  }
-
-  public toMarkdown(): string {
-    return `## ${texts(this.block.heading_2.rich_text)}\n`;
   }
 }
