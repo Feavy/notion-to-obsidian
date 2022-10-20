@@ -1,5 +1,4 @@
 import NotionAPI from "../notion/NotionAPI";
-import ChildPage from "../notion/blocks/ChildPage";
 import Graph from "./Graph";
 import Page from "../notion/blocks/Page";
 import Cache from "./Cache";
@@ -35,38 +34,29 @@ export default class GraphCreator {
     parentPage && parentPage.childPages.push(page);
     const cachedPage = this.cache?.cached_pages[page.id];
 
+    let childPages: string[];
+
     if(cachedPage && page.last_edited_time === cachedPage.last_edited_time) {
       console.log("Get page from cache: "+page.title);
 
       page.cached = true;
-      page.path = () => this.cache.cached_pages[page.id].path;
-      page.folder = () => this.cache.cached_pages[page.id].folder;
-
-      this.nodes.set(page.id, page);
-
-      const promises: Promise<void>[] = [];
-
-      for(const child of cachedPage.child_pages) {
-        promises.push(this.fillGraph(child, page));
-      }
-
-      await Promise.all(promises);
-      return;
+      page.path = () => cachedPage.path;
+      page.folder = () => cachedPage.folder;
+      childPages = cachedPage.child_pages;
+    }else {
+      console.log("Processing page: "+page.title);
+      await this.notion.retrievePageBlocks(page);
+      childPages = page.getChildPages().map(child => child.id);
     }
 
-    await this.notion.retrievePageBlocks(page);
-
-    console.log("Processing page: "+page.title);
     page.parent = parentPage;
-
-    const children: ChildPage[] = page.getAll("child_page");
 
     this.nodes.set(page.id, page);
 
     const promises: Promise<void>[] = [];
 
-    for(const child of children) {
-      promises.push(this.fillGraph(child.id, page));
+    for(const child of childPages) {
+      promises.push(this.fillGraph(child, page));
     }
 
     await Promise.all(promises);
