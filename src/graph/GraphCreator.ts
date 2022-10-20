@@ -3,6 +3,7 @@ import Graph from "./Graph";
 import Page from "../notion/blocks/Page";
 import Cache from "./Cache";
 import fs from "fs";
+import VirtualPage from "../notion/blocks/VirtualPage";
 
 export default class GraphCreator {
   public constructor(private readonly notion: NotionAPI) { }
@@ -28,25 +29,40 @@ export default class GraphCreator {
     }
   }
 
-  private async fillGraph(pageId: string, parentPage?: Page) {
+  private async fillGraph(pageIdOrVirtualPage: string|VirtualPage, parentPage?: Page) {
     // Obtenir les link_to_page et les child_page
-    const page = await this.notion.retrievePage(pageId);
-    parentPage && parentPage.childPages.push(page);
-    const cachedPage = this.cache?.cached_pages[page.id];
 
-    let childPages: string[];
+    const pageId = typeof pageIdOrVirtualPage === "string" ? pageIdOrVirtualPage : pageIdOrVirtualPage.id;
+
+    const cachedPage = this.cache?.cached_pages[pageId];
+
+    let page: Page;
+    if(pageIdOrVirtualPage instanceof VirtualPage) {
+      page = pageIdOrVirtualPage;
+    } else if(cachedPage?.virtual) {
+      page = new VirtualPage([], pageId);
+    } else {
+      page = await this.notion.retrievePage(pageIdOrVirtualPage);
+    }
+
+    parentPage && parentPage.childPages.push(page);
+
+    let childPages: (string|VirtualPage)[];
 
     if(cachedPage && page.last_edited_time === cachedPage.last_edited_time) {
       console.log("Get page from cache: "+page.title);
 
       page.cached = true;
+      page.virtual = cachedPage.virtual;
       page.path = () => cachedPage.path;
       page.folder = () => cachedPage.folder;
       childPages = cachedPage.child_pages;
-    }else {
+    } else {
       console.log("Processing page: "+page.title);
-      await this.notion.retrievePageBlocks(page);
-      childPages = page.getChildPages().map(child => child.id);
+      if(!(page instanceof VirtualPage)) {
+        await this.notion.retrievePageBlocks(page);
+      }
+      childPages = page.getChildPages();
     }
 
     page.parent = parentPage;

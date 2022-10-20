@@ -3,6 +3,7 @@ import {NotionRichText} from "../notion/NotionTypes";
 import {uuid} from "../notion/NotionUtils";
 import Cache from "./Cache";
 import fs from "fs";
+import VirtualPage from "../notion/blocks/VirtualPage";
 
 export default class Graph {
   public constructor(public readonly nodes: Map<string, Page>, private readonly cache: Cache = {cached_pages: {}}) {
@@ -16,13 +17,13 @@ export default class Graph {
   }
 
   public save() {
+    this.deleteRemovedPages();
     for (const page of this.nodes.values()) {
       if(page.cached) continue;
       const links = page.getLinks();
       this.processLinks(links);
       page.writeToFile(this);
     }
-    this.deleteRemovedPages();
     this.saveCache();
   }
 
@@ -50,7 +51,8 @@ export default class Graph {
         last_edited_time: page.last_edited_time,
         path: page.path(),
         folder: page.folder(),
-        child_pages: page.childPages.map(page => page.id)
+        child_pages: page.childPages.map(page => page.id),
+        virtual: page instanceof VirtualPage
       };
     }
     fs.writeFileSync("vault/cache.json", JSON.stringify(cache, null, 2));

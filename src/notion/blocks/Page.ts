@@ -3,6 +3,9 @@ import {escape, plaintexts} from "../NotionUtils";
 import {NotionPage, NotionRichText} from "../NotionTypes";
 import fs from "fs";
 import Graph from "../../graph/Graph";
+import ChildPage from "./ChildPage";
+import VirtualPage from "./VirtualPage";
+import Heading from "./Heading";
 
 export default class Page extends Block {
   public readonly last_edited_time: string;
@@ -11,6 +14,7 @@ export default class Page extends Block {
   public slug: string;
   public parent?: Page;
   public cached: boolean = false;
+  public virtual: boolean = false;
 
   public readonly childPages: Page[] = [];
 
@@ -35,6 +39,34 @@ export default class Page extends Block {
       return this.parent.path();
     }
     return null;
+  }
+
+  public getChildPages(): (string|VirtualPage)[] {
+    const pages: (string|VirtualPage)[] = [];
+    let virtualPage: VirtualPage;
+    this.visitDeep(block => {
+      if(block instanceof Heading) {
+          virtualPage = new VirtualPage(block.richText);
+          pages.push(virtualPage);
+      }
+      if(block instanceof ChildPage) {
+        if(virtualPage) {
+          virtualPage.addChildPage(block);
+        }else{
+          pages.push(block.id);
+        }
+      }
+    });
+    return pages.filter(page => typeof page === "string" || page.childPagesId.length > 0)
+        .map(page => {
+          if(page instanceof VirtualPage && page.childPagesId.length === 1) {
+            // Info only one subpage in title, let a direct link
+            page.childPagesBlocks[0].id = page.childPagesId[0];
+            return page.childPagesId[0];
+          }else{
+            return page;
+          }
+        });
   }
 
   public getLinks(): NotionRichText[] {
