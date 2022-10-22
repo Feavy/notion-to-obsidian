@@ -10,6 +10,7 @@ import Heading2 from "./Heading2";
 import Heading1 from "./Heading1";
 import Heading3 from "./Heading3";
 import Code from "./Code";
+import LinkPreview from "./LinkPreview";
 
 type BlockConstructor<T extends Block, B extends NotionBlock> = new (block: B, children: Block[]) => T;
 
@@ -26,6 +27,7 @@ export default class Blocks {
     Blocks.register("bulleted_list_item", BulletedListItem);
     Blocks.register("numbered_list_item", NumberedListItem);
     Blocks.register("code", Code);
+    Blocks.register("link_preview", LinkPreview);
   }
 
   private static register(type: string, block: BlockConstructor<any, any>) {

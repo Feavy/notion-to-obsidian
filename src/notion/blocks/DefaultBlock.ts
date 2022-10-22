@@ -11,6 +11,8 @@ export default class DefaultBlock extends Block {
   public toMarkdown(graph: Graph): string {
     if(this.block[this.block.type].rich_text) {
       return texts(this.block[this.block.type].rich_text)+"\n";
+    } else if(this.block[this.block.type].url) {
+        return `[${this.block[this.block.type].url}](${this.block[this.block.type].url})\n`;
     }
     return this.children.map(child => child.toMarkdown(graph)).join("\n");
   }

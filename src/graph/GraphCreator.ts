@@ -40,7 +40,7 @@ export default class GraphCreator {
     if(pageIdOrVirtualPage instanceof VirtualPage) {
       page = pageIdOrVirtualPage;
     } else if(cachedPage?.virtual) {
-      page = new VirtualPage([], pageId);
+      page = new VirtualPage([{plain_text: cachedPage.title}] as any, pageId);
     } else {
       page = await this.notion.retrievePage(pageIdOrVirtualPage);
     }
